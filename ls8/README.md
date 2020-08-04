@@ -60,6 +60,27 @@ but you'll have to implement those three above instructions first!
 ## Step 0: IMPORTANT: inventory what is here!
 
 * Make a list of files here.
+  - cpu.py- runs class commands
+      - looks for instructions at RAM addresses
+      - has built in:
+          - LDI/load immediately
+          - ALU
+            - only add implemented
+          - trace
+          - run
+      - expects but not given:
+          - self.ram
+          - self.ram_read
+          - self.pc (program counter)
+      - contains no built-in knowledge of what 8-bit instructions mean
+      - contains no registers
+  - ls8 - runs cpu
+      - contains no built-in knowledge of what 8-bit instructions mean
+  - Readme - gives instructions of what commands expected and guides us to spec
+  - LS9-Spec - can be used as an index for each aspect's implementation
+  - Cheatsheet - shows 8-bit instruction combinations that MAY represent cpu instructions
+      - spec overrides when applicable
+      
 * Write a short 3-10-word description of what each file does.
 * Note what has been implemented, and what hasn't.
 * Read this whole file.
