@@ -126,8 +126,11 @@ class CPU:
             MAR = 0
 
         bt = Branch_Table()
-        print("6",self.ram[5])
-        while self.ram_read(self.pc) != HLT:
+
+        while int(self.ram[self.pc],2) != HLT:
+            # print("pc",self.pc)
+            # print("ram",self.ram[self.pc])
+            # print("hlt", HLT)
             IR = self.ram[self.pc]
             if len(str(IR)) < 8:
                 num_operands = "00" + str(IR)[2]
@@ -138,12 +141,15 @@ class CPU:
             print(num_operands)
 
             if num_operands == "00":
+                print("hit +1")
                 bt.run(self.ram[self.pc], self)
             elif num_operands == "01":
+                print("hit +2")
                 operand_a = pc + 1
                 bt.run2(self.ram[self.pc], self, self.ram[operand_a]) #A VALUE AS A REGISTER
                 self.pc += 1
             elif num_operands == "10":
+                print("hit +3")
                 operand_a =pc + 1
                 operand_b =pc + 2
                 bt.run3(self.ram[self.pc], self, self.ram[operand_a], self.ram[operand_b]) #SAME
