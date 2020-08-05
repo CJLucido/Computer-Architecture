@@ -204,6 +204,13 @@ This instruction sets a specified register to a specified value.
 See the LS-8 spec for the details of what this instructions does and its opcode
 value.
 
+    {LDI binary: LDI_function(),}
+
+    LDI is a P2 who's function should be
+     def LDI_function(register, integer):
+          register = integer
+          #pc increment taken care of at higher scope
+
 ## Step 6: Add the `PRN` instruction
 
 This is a very similar process to adding `LDI`, but the handler is simpler. See
