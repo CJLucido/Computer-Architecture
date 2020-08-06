@@ -11,17 +11,18 @@ class Branch_Table:
     def __init__(self):
         # Set up the branch table
         self.branchtable = {}
-        print("LDI",LDI)
+        # print("LDI",LDI)
         self.branchtable[LDI] = self.handle_ldi
         self.branchtable[PRN] = self.handle_prn
 
     def handle_ldi(self, cpu, register, value):
-        print(cpu)
+        # print(cpu)
         cpu.reg_write(value, int(register,2))
 
     def handle_prn(self, cpu, register):
         # print(int(register, 10))
-        cpu.ram_read(int(register,2))
+        print(  int(cpu.reg[int(register,2)], 2)  )
+        # print(cpu.ram_read(register)
 
     def run(self, ir, cpu):
         # Example calls into the branch table
@@ -138,23 +139,23 @@ class CPU:
                 num_operands = "0" + str(IR)[2]
             else:
                 num_operands = str(IR)[2:4]
-            print(num_operands)
+            # print(num_operands)
 
             if num_operands == "00":
-                print("hit +1")
+                # print("hit +1")
                 bt.run(self.ram[self.pc], self)
             elif num_operands == "01":
-                print("hit +2")
+                # print("hit +2")
                 operand_a = pc + 1
                 bt.run2(self.ram[self.pc], self, self.ram[operand_a]) #A VALUE AS A REGISTER
                 self.pc += 1
             elif num_operands == "10":
-                print("hit +3")
+                # print("hit +3")
                 operand_a =pc + 1
                 operand_b =pc + 2
                 bt.run3(self.ram[self.pc], self, self.ram[operand_a], self.ram[operand_b]) #SAME
                 self.pc += 2
             
             self.pc += 1
-            print("should", self.pc)
-            print("equal",HLT)
+            # print("should", self.pc)
+            # print("equal",HLT)
