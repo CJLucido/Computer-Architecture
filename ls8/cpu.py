@@ -11,6 +11,7 @@ POP = 0b01000110
 RET = 0b00010001
 CALL = 0b01010000
 ADD = 0b10100000
+ST = 0b10000100
 
 class Branch_Table:
 
@@ -26,6 +27,7 @@ class Branch_Table:
         self.branchtable[RET] = self.handle_ret
         self.branchtable[CALL] = self.handle_call
         self.branchtable[ADD] = self.handle_add
+        self.branchtable[ST] = self.handle_st
 
     def handle_ldi(self, cpu, register, value):
         cpu.reg_write(value, int(register,2))
@@ -42,7 +44,7 @@ class Branch_Table:
         cpu.reg_write(value, int(register_a,2))
 
     def handle_push(self, cpu, register):
-        print(cpu.reg[int(register,2)])
+        # print(cpu.reg[int(register,2)])
         value = int(cpu.reg[int(register,2)], 2)
         cpu.reg[7] -= 1 #SP
         cpu.ram[cpu.reg[7]] = value
@@ -80,6 +82,10 @@ class Branch_Table:
         # print("hit add")
         value = int(cpu.reg[int(register_a,2)], 2) + int(cpu.reg[int(register_b,2)], 2)
         cpu.reg_write(value, int(register_a,2))
+
+    def handle_st(self, cpu, register_a, register_b):
+        value = int(cpu.reg[int(register_b,2)], 2)
+        cpu.ram_write(value, int(cpu.reg[int(register_a,2)], 2))
 
     def run(self, ir, cpu):
         # Example calls into the branch table
