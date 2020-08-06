@@ -16,13 +16,11 @@ class Branch_Table:
         self.branchtable[PRN] = self.handle_prn
 
     def handle_ldi(self, cpu, register, value):
-        # print(cpu)
         cpu.reg_write(value, int(register,2))
 
     def handle_prn(self, cpu, register):
-        # print(int(register, 10))
         print(  int(cpu.reg[int(register,2)], 2)  )
-        # print(cpu.ram_read(register)
+
 
     def run(self, ir, cpu):
         # Example calls into the branch table
@@ -64,27 +62,29 @@ class CPU:
     def reg_write(self, MDR, MAR):
         self.reg[MAR] = MDR
 
-    def load(self):
+    def load(self, file_program):
         """Load a program into memory."""
 
         address = 0
 
         # For now, we've just hardcoded a program:
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
+        program = file_program
+        
+        # [
+        #     # From print8.ls8
+        #     0b10000010, # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     0b01000111, # PRN R0
+        #     0b00000000,
+        #     0b00000001, # HLT
+        # ]
 
         for instruction in program:
-            self.ram[address] = bin(instruction)
-            # print(self.ram[address])
-            # print(instruction)
+            # self.ram[address] = bin(instruction) #original
+            # print(int(instruction, 2))
+            self.ram[address] = instruction
             address += 1
 
 
@@ -133,12 +133,17 @@ class CPU:
             # print("ram",self.ram[self.pc])
             # print("hlt", HLT)
             IR = self.ram[self.pc]
-            if len(str(IR)) < 8:
-                num_operands = "00" + str(IR)[2]
-            elif len(str(IR)) < 10:
-                num_operands = "0" + str(IR)[2]
-            else:
-                num_operands = str(IR)[2:4]
+
+            #______________________THIS WAS FOR HARDCODED WITH 0b prefix
+            # if len(str(IR)) < 8:
+            #     num_operands = "00" + str(IR)[2]
+            # elif len(str(IR)) < 10:
+            #     num_operands = "0" + str(IR)[2]
+            # else:
+            #     num_operands = str(IR)[2:4]
+            #____________________________________________________
+
+            num_operands = str(IR)[0:2]
             # print(num_operands)
 
             if num_operands == "00":
