@@ -284,6 +284,8 @@ x = int("1010101", 2)  # Convert binary string to integer
 
     take each string, convert it, store it in RAM
 
+    DID THIS BACKWARDS SO NOW I HAVE TO MAKE ALL MY HANDLERS CONVERT TO INT *CRIES IMMENSELY*
+
 ## Step 8: Implement a Multiply and Print the Result
 
 Extend your LS8 emulator to support the following program:

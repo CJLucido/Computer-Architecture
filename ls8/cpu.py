@@ -4,6 +4,7 @@ import sys
 
 HLT = 0b00000001 
 LDI = 0b10000010
+MUL = 0b10100010
 PRN = 0b01000111
 
 class Branch_Table:
@@ -14,12 +15,21 @@ class Branch_Table:
         # print("LDI",LDI)
         self.branchtable[LDI] = self.handle_ldi
         self.branchtable[PRN] = self.handle_prn
+        self.branchtable[MUL] = self.handle_mul
 
     def handle_ldi(self, cpu, register, value):
         cpu.reg_write(value, int(register,2))
 
     def handle_prn(self, cpu, register):
-        print(  int(cpu.reg[int(register,2)], 2)  )
+        if type(cpu.reg[int(register,2)]) == str:
+            print(  int(cpu.reg[int(register,2)], 2)  )
+        else:
+            print( cpu.reg[int(register,2)] )
+    
+    def handle_mul(self,cpu, register_a, register_b):
+        value = int(cpu.reg[int(register_a,2)], 2) * int(cpu.reg[int(register_b,2)], 2)
+        # print("value",  value)
+        cpu.reg_write(value, int(register_a,2))
 
 
     def run(self, ir, cpu):
@@ -46,7 +56,7 @@ class CPU:
     def __init__(self):
         """Construct a new CPU."""
         self.ram = [0] * 255
-        self.reg = [None] * 8
+        self.reg = [0] * 8
         self.pc = 0
         #self.reg[5] = interrupt mask (IM)
         #self.reg[6] = interrupt status (IS)
@@ -120,7 +130,7 @@ class CPU:
     def run(self):
         """Run the CPU."""
 
-        pc = self.pc
+
 
         MAR = 0
         if MAR > 7:
@@ -133,6 +143,7 @@ class CPU:
             # print("ram",self.ram[self.pc])
             # print("hlt", HLT)
             IR = self.ram[self.pc]
+            pc = self.pc
 
             #______________________THIS WAS FOR HARDCODED WITH 0b prefix
             # if len(str(IR)) < 8:
@@ -144,7 +155,7 @@ class CPU:
             #____________________________________________________
 
             num_operands = str(IR)[0:2]
-            # print(num_operands)
+            # print(IR)
 
             if num_operands == "00":
                 # print("hit +1")
@@ -158,6 +169,7 @@ class CPU:
                 # print("hit +3")
                 operand_a =pc + 1
                 operand_b =pc + 2
+                # print("hit2",operand_a)
                 bt.run3(self.ram[self.pc], self, self.ram[operand_a], self.ram[operand_b]) #SAME
                 self.pc += 2
             
