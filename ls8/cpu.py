@@ -6,6 +6,8 @@ HLT = 0b00000001
 LDI = 0b10000010
 MUL = 0b10100010
 PRN = 0b01000111
+PUSH =0b01000101
+POP = 0b01000110
 
 class Branch_Table:
 
@@ -16,6 +18,8 @@ class Branch_Table:
         self.branchtable[LDI] = self.handle_ldi
         self.branchtable[PRN] = self.handle_prn
         self.branchtable[MUL] = self.handle_mul
+        self.branchtable[PUSH] = self.handle_push
+        self.branchtable[POP] = self.handle_pop
 
     def handle_ldi(self, cpu, register, value):
         cpu.reg_write(value, int(register,2))
@@ -31,6 +35,17 @@ class Branch_Table:
         # print("value",  value)
         cpu.reg_write(value, int(register_a,2))
 
+    def handle_push(self, cpu, register):
+        value = int(cpu.reg[int(register,2)], 2)
+        cpu.reg[7] -= 1 #SP
+        cpu.ram[cpu.reg[7]] = value
+        #MAY NEED TO RETURN HERE AND HANDLE WHEN THE STACK STARTS TO MOVE INTO WHERE THE PROGRAM INSTRUCTIONS END
+
+    def handle_pop(self, cpu, register):
+        value = cpu.ram[cpu.reg[7]]
+        cpu.reg[7] += 1
+        cpu.reg_write(value, int(register,2))
+        #MAY NEED TO RETURN HERE AND HANDLE INCREMENT PAST 0XF4
 
     def run(self, ir, cpu):
         # Example calls into the branch table
@@ -60,7 +75,9 @@ class CPU:
         self.pc = 0
         #self.reg[5] = interrupt mask (IM)
         #self.reg[6] = interrupt status (IS)
-        #self.reg[7] = initial stack pointer (SP)
+        # self.sp = 0xF4 # COULD THIS BE A BETTER WAY?? with self.reg[7] = self.ram[self.sp], would an update to self.sp update reg[7]??
+        self.reg[7] = 0xF4#self.ram[self.sp] #initial stack pointer (SP)
+        self.fl = 0
     
     def ram_read(self, MAR):
         return self.ram[MAR]
