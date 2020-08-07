@@ -17,6 +17,7 @@ CMP = 0b10100111
 PRA = 0b01001000
 JMP = 0b01010100
 IRET = 0b00010011
+NOP = 0b00000000
 
 class Branch_Table:
 
@@ -37,6 +38,7 @@ class Branch_Table:
         self.branchtable[PRA] = self.handle_pra
         self.branchtable[JMP] = self.handle_jmp
         self.branchtable[IRET] = self.handle_iret
+        self.branchtable[NOP] = self.handle_nop
 
     def handle_ldi(self, cpu, register, value):
         cpu.reg_write(value, int(register,2))
@@ -116,11 +118,14 @@ class Branch_Table:
         cpu.pc = int(cpu.reg[int(register,2)], 2)
 
     def handle_iret(self, cpu):
-        i=0
-        while i < 10:
+        # i=0
+        # while i < 10:
             cpu.pc = int(cpu.ram[cpu.reg[7]], 2) + 1
             cpu.reg[7] += 1
             #STRONG MAYBE
+
+    def handle_nop(self, cpu):
+        pass
 
     def run(self, ir, cpu):
         # Example calls into the branch table
@@ -246,14 +251,14 @@ class CPU:
             #----------------------------------------------INTERRUPTS
             time_check = datetime.datetime.now()
             seconds_compare = time_check.strftime("%S")
-            print("1st", seconds_check)
-            print("2nd", seconds_compare)
+            # print("1st", seconds_check)
+            # print("2nd", seconds_compare)
             if seconds_check == seconds_compare:
                 self.reg[6] += 1
             else:
                 self.reg[6] = 0
             seconds_check = time_check.strftime("%S")
-            print(self.reg[6])
+            # print(self.reg[6])
             #------------------------------------------------
             IR = self.ram[self.pc]
             pc = self.pc
@@ -277,7 +282,7 @@ class CPU:
                 for x in values:
                     self.reg[7] -= 1
                     self.ram[self.reg[7]] = x
-                self.pc = self.ram[int("0xF8", 2)] #???????
+                self.pc = self.ram[int("0xF8", 16)] #???????
             elif sets_pc == "0":
                 if num_operands == "00":
                     # print("hit +1")
