@@ -15,6 +15,7 @@ ADD = 0b10100000
 ST = 0b10000100
 CMP = 0b10100111
 PRA = 0b01001000
+JMP = 0b01010100
 
 class Branch_Table:
 
@@ -33,6 +34,7 @@ class Branch_Table:
         self.branchtable[ST] = self.handle_st
         self.branchtable[CMP] = self.handle_cmp
         self.branchtable[PRA] = self.handle_pra
+        self.branchtable[JMP] = self.handle_jmp
 
     def handle_ldi(self, cpu, register, value):
         cpu.reg_write(value, int(register,2))
@@ -107,6 +109,9 @@ class Branch_Table:
     
     def handle_pra(self, cpu, register):
         print(chr(int(cpu.reg[int(register,2)], 2)))
+
+    def handle_jmp(self, cpu, register):
+        cpu.pc = int(cpu.reg[int(register,2)], 2)
 
     def run(self, ir, cpu):
         # Example calls into the branch table
