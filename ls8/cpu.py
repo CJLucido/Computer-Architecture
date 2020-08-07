@@ -14,6 +14,7 @@ CALL = 0b01010000
 ADD = 0b10100000
 ST = 0b10000100
 CMP = 0b10100111
+PRA = 0b01001000
 
 class Branch_Table:
 
@@ -31,6 +32,7 @@ class Branch_Table:
         self.branchtable[ADD] = self.handle_add
         self.branchtable[ST] = self.handle_st
         self.branchtable[CMP] = self.handle_cmp
+        self.branchtable[PRA] = self.handle_pra
 
     def handle_ldi(self, cpu, register, value):
         cpu.reg_write(value, int(register,2))
@@ -102,6 +104,9 @@ class Branch_Table:
             cpu.fl = "00000001"
         else:
             print("Error with flag")
+    
+    def handle_pra(self, cpu, register):
+        print(chr(int(cpu.reg[int(register,2)], 2)))
 
     def run(self, ir, cpu):
         # Example calls into the branch table
@@ -258,7 +263,7 @@ class CPU:
                 for x in values:
                     self.reg[7] -= 1
                     self.ram[self.reg[7]] = x
-                self.pc = self.ram[int("0xF8", 2)]
+                self.pc = self.ram[int("0xF8", 2)] #???????
             elif sets_pc == "0":
                 if num_operands == "00":
                     # print("hit +1")

@@ -463,10 +463,15 @@ stack, look up the interrupt handler address in the interrupt vector
 table at address `0xF8`, and set the PC to it. Execution continues in
 the interrupt handler.
 
+      must apply CMP conditional self.fl setting "00000100", "00000010", or "00000001"
       push pc, then fl, then R0-R6 to stack
+          this needs to be explicitly done for every register
+      I don't see the instructions loading anything in I0!?
 
 Then when an `IRET` instruction is found, the registers and PC are
 popped off the stack and execution continues normally.
+
+      Need to implement IRET
 
 ## Example
 
@@ -474,6 +479,10 @@ This code prints out the letter `A` from the timer interrupt handler
 that fires once per second.
 
 ```
+        need to implement PRA!!!!!
+        need to implement JMP!!!
+
+
 # interrupts.ls8
 
 10000010 # LDI R0,0XF8
