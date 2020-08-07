@@ -1,6 +1,7 @@
 """CPU functionality."""
 
 import sys
+import datetime
 
 HLT = 0b00000001 
 LDI = 0b10000010
@@ -12,6 +13,7 @@ RET = 0b00010001
 CALL = 0b01010000
 ADD = 0b10100000
 ST = 0b10000100
+CMP = 0b10100111
 
 class Branch_Table:
 
@@ -28,6 +30,7 @@ class Branch_Table:
         self.branchtable[CALL] = self.handle_call
         self.branchtable[ADD] = self.handle_add
         self.branchtable[ST] = self.handle_st
+        self.branchtable[CMP] = self.handle_cmp
 
     def handle_ldi(self, cpu, register, value):
         cpu.reg_write(value, int(register,2))
@@ -87,6 +90,19 @@ class Branch_Table:
         value = int(cpu.reg[int(register_b,2)], 2)
         cpu.ram_write(value, int(cpu.reg[int(register_a,2)], 2))
 
+    def handle_cmp(self, cpu, register_a, register_b):
+        value_a = int(cpu.reg[int(register_a,2)], 2)
+        value_b = int(cpu.reg[int(register_b,2)], 2)
+        cpu.fl = "00000LGE"
+        if value_a < value_b:
+            cpu.fl = "00000100"
+        elif value_a > value_b:
+            cpu.fl = "00000010"
+        elif value_a == value_b:
+            cpu.fl = "00000001"
+        else:
+            print("Error with flag")
+
     def run(self, ir, cpu):
         # Example calls into the branch table
         # ir = LDI
@@ -114,10 +130,14 @@ class CPU:
         self.ram = [0] * 255
         self.reg = [0] * 8
         self.pc = 0
-        #self.reg[5] = interrupt mask (IM)
-        #self.reg[6] = interrupt status (IS)
+
+        self.interrupt = [0] * 8
+        self.reg[5] = 0 #interrupt mask (IM)
+        self.reg[6] = 0 #interrupt status (IS)
         # self.sp = 0xF4 # COULD THIS BE A BETTER WAY?? with self.reg[7] = self.ram[self.sp], would an update to self.sp update reg[7]??
-        self.reg[7] = 0xF4#self.ram[self.sp] #initial stack pointer (SP)
+
+
+        self.reg[7] = 0xF4 #self.ram[self.sp] #initial stack pointer (SP)
         self.fl = 0
     
     def ram_read(self, MAR):
@@ -196,11 +216,27 @@ class CPU:
             MAR = 0
 
         bt = Branch_Table()
+        #-----------------------------------INTERRUPTS
+        time_check_one = datetime.datetime.now()
+        seconds_check = time_check_one.strftime("%S")
+        #---------------------------------------------
 
         while int(self.ram[self.pc],2) != HLT:
             # print("pc",type(self.pc))
             # print("ram",self.ram[self.pc])
             # print("hlt", HLT)
+            #----------------------------------------------INTERRUPTS
+            time_check = datetime.datetime.now()
+            seconds_compare = time_check.strftime("%S")
+            print("1st", seconds_check)
+            print("2nd", seconds_compare)
+            if seconds_check == seconds_compare:
+                self.reg[6] += 1
+            else:
+                self.reg[6] = 0
+            seconds_check = time_check.strftime("%S")
+            print(self.reg[6])
+            #------------------------------------------------
             IR = self.ram[self.pc]
             pc = self.pc
 
@@ -218,7 +254,12 @@ class CPU:
             sets_pc = IR[3]
             # print(sets_pc)
             # print(num_operands)
-            if sets_pc == "0":
+            if self.reg[6] == 0:
+                values = [str(bin(self.pc))[2:], self.fl, self.reg[0], self.reg[1], self.reg[2], self.reg[3] self.reg[4], self.reg[5], str(bin(self.reg[6]))[2:]]
+                for x in values:
+                    self.reg[7] -= 1
+                    self.ram[self.reg[7]] = x
+            elif sets_pc == "0":
                 if num_operands == "00":
                     # print("hit +1")
                     bt.run(self.ram[self.pc], self)

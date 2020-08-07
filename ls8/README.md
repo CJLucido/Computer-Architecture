@@ -463,6 +463,8 @@ stack, look up the interrupt handler address in the interrupt vector
 table at address `0xF8`, and set the PC to it. Execution continues in
 the interrupt handler.
 
+      push pc, then fl, then R0-R6 to stack
+
 Then when an `IRET` instruction is found, the registers and PC are
 popped off the stack and execution continues normally.
 
