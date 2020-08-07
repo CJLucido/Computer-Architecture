@@ -16,6 +16,7 @@ ST = 0b10000100
 CMP = 0b10100111
 PRA = 0b01001000
 JMP = 0b01010100
+IRET = 0b00010011
 
 class Branch_Table:
 
@@ -35,6 +36,7 @@ class Branch_Table:
         self.branchtable[CMP] = self.handle_cmp
         self.branchtable[PRA] = self.handle_pra
         self.branchtable[JMP] = self.handle_jmp
+        self.branchtable[IRET] = self.handle_iret
 
     def handle_ldi(self, cpu, register, value):
         cpu.reg_write(value, int(register,2))
@@ -112,6 +114,13 @@ class Branch_Table:
 
     def handle_jmp(self, cpu, register):
         cpu.pc = int(cpu.reg[int(register,2)], 2)
+
+    def handle_iret(self, cpu):
+        i=0
+        while i < 10:
+            cpu.pc = int(cpu.ram[cpu.reg[7]], 2) + 1
+            cpu.reg[7] += 1
+            #STRONG MAYBE
 
     def run(self, ir, cpu):
         # Example calls into the branch table
@@ -264,7 +273,7 @@ class CPU:
             # print(sets_pc)
             # print(num_operands)
             if self.reg[6] == 0:
-                values = [str(bin(self.pc))[2:], self.fl, self.reg[0], self.reg[1], self.reg[2], self.reg[3] self.reg[4], self.reg[5], str(bin(self.reg[6]))[2:]]
+                values = [str(bin(self.pc))[2:], self.fl, self.reg[0], self.reg[1], self.reg[2], self.reg[3], self.reg[4], self.reg[5], str(bin(self.reg[6]))[2:]]
                 for x in values:
                     self.reg[7] -= 1
                     self.ram[self.reg[7]] = x
