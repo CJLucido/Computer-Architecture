@@ -131,7 +131,6 @@ class CPU:
         self.reg = [0] * 8
         self.pc = 0
 
-        self.interrupt = [0] * 8
         self.reg[5] = 0 #interrupt mask (IM)
         self.reg[6] = 0 #interrupt status (IS)
         # self.sp = 0xF4 # COULD THIS BE A BETTER WAY?? with self.reg[7] = self.ram[self.sp], would an update to self.sp update reg[7]??
@@ -259,6 +258,7 @@ class CPU:
                 for x in values:
                     self.reg[7] -= 1
                     self.ram[self.reg[7]] = x
+                self.pc = self.ram[int("0xF8", 2)]
             elif sets_pc == "0":
                 if num_operands == "00":
                     # print("hit +1")
