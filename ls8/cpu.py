@@ -18,6 +18,8 @@ PRA = 0b01001000
 JMP = 0b01010100
 IRET = 0b00010011
 NOP = 0b00000000
+JEQ = 0b01010101
+JNE = 0b01010110
 
 class Branch_Table:
 
@@ -39,6 +41,8 @@ class Branch_Table:
         self.branchtable[JMP] = self.handle_jmp
         self.branchtable[IRET] = self.handle_iret
         self.branchtable[NOP] = self.handle_nop
+        self.branchtable[JEQ] = self.handle_jeq
+        self.branchtable[JNE] = self.handle_jne
 
     def handle_ldi(self, cpu, register, value):
         cpu.reg_write(value, int(register,2))
@@ -127,6 +131,19 @@ class Branch_Table:
     def handle_nop(self, cpu):
         pass
 
+    def handle_jeq(self, cpu, register):
+        # print(cpu.fl)
+        if cpu.fl == "00000001":
+            cpu.pc = int(cpu.reg[int(register,2)], 2)
+        else:
+            cpu.pc += 2
+
+    def handle_jne(self, cpu, register):
+        if cpu.fl != "00000001":
+            cpu.pc = int(cpu.reg[int(register,2)], 2)
+        else:
+            cpu.pc += 2
+
     def run(self, ir, cpu):
         # Example calls into the branch table
         # ir = LDI
@@ -162,6 +179,8 @@ class CPU:
 
         self.reg[7] = 0xF4 #self.ram[self.sp] #initial stack pointer (SP)
         self.fl = 0
+
+       
     
     def ram_read(self, MAR):
         return self.ram[MAR]
@@ -244,7 +263,29 @@ class CPU:
         seconds_check = time_check_one.strftime("%S")
         #---------------------------------------------
 
+        interrupt_happened = False
+        masked_interrupts = 0
+
         while int(self.ram[self.pc],2) != HLT:
+            #____________MASKED INTERRUPTS variable unnecessary because I'm not using bitwise to check interrupt settings (using string), just trying something here to see if I can change the interrupt_happened variable
+            # this is more useful for keyboard stretch but not complete yet
+            # print(self.reg[5])
+            # print(type(self.reg[5]))
+            # print(self.reg[6])
+            # print(type(self.reg[6]))
+            # if interrupt_happened == False:
+            #     if type(self.reg[5]) == str:
+            #         masked_interrupts = int(self.reg[5], 2) & self.reg[6]
+            #         print("hit")
+                
+
+
+            #     # Right shift interrupts down by i, then mask with 1 to see if that bit was set
+            # interrupt_happened = bin(masked_interrupts)[-1] == 1
+            # print(interrupt_happened)
+            #______________________________________________________
+            # print("bitwise", bin(0b101) >> bin(0b1)) # can't do it like this, only with actual numbers, conversions too wonky now to implement throughout
+
             # print("pc",type(self.pc))
             # print("ram",self.ram[self.pc])
             # print("hlt", HLT)
