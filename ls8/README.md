@@ -60,6 +60,28 @@ but you'll have to implement those three above instructions first!
 ## Step 0: IMPORTANT: inventory what is here!
 
 * Make a list of files here.
+  - cpu.py- runs class commands
+      - looks for instructions at RAM addresses
+      - has built in:
+          - LDI/load immediately
+          - ALU
+            - only add implemented
+          - trace
+          - run
+      - expects but not given:
+          - self.ram (memory/instructions)
+          - self.reg
+          - self.ram_read()
+          - self.pc (program counter)
+      - contains no built-in knowledge of what 8-bit instructions mean
+      - contains no registers
+  - ls8 - runs cpu
+      - contains no built-in knowledge of what 8-bit instructions mean
+  - Readme - gives instructions of what commands expected and guides us to spec
+  - LS9-Spec - can be used as an index for each aspect's implementation
+  - Cheatsheet - shows 8-bit instruction combinations that MAY represent cpu instructions
+      - spec overrides when applicable
+
 * Write a short 3-10-word description of what each file does.
 * Note what has been implemented, and what hasn't.
 * Read this whole file.
@@ -75,11 +97,21 @@ general-purpose registers.
 > ```python
 > x = [0] * 25  # x is a list of 25 zeroes
 > ```
+in init
+  self.ram = []  this is just our memory, it can have an infinite set of instructions
+  self.reg = [0] * 8
+  self.pc = 0
+
+  def ram_read(): ???? place above trace
 
 Also add properties for any internal registers you need, e.g. `PC`.
 
 Later on, you might do further initialization here, e.g. setting the initial
 value of the stack pointer.
+
+self.reg[5] = interrupt mask (IM)
+self.reg[6] = interrupt status (IS)
+self.reg[7] = initial stack pointer (SP)
 
 ## Step 2: Add RAM functions
 
@@ -89,8 +121,13 @@ the `CPU` object.
 `ram_read()` should accept the address to read and return the value stored
 there.
 
+def ram_read(address):
+  return self.ram[address]
+
 `ram_write()` should accept a value to write, and the address to write it to.
 
+def ram_write(value, address):
+    ???????????
 > Inside the CPU, there are two internal registers used for memory operations:
 > the _Memory Address Register_ (MAR) and the _Memory Data Register_ (MDR). The
 > MAR contains the address that is being read or written to. The MDR contains
@@ -103,6 +140,9 @@ We'll make use of these helper function later.
 Later on, you might do further initialization here, e.g. setting the initial
 value of the stack pointer.
 
+self.reg[0?] = _Memory Address Register_ (MAR) (address/reg[1?] to read or write)
+self.reg[1?] = _Memory Data Register_ (MDR) (VALUE to read or write)
+
 ## Step 3: Implement the core of `CPU`'s `run()` method
 
 This is the workhorse function of the entire processor. It's the most difficult
@@ -112,29 +152,47 @@ It needs to read the memory address that's stored in register `PC`, and store
 that result in `IR`, the _Instruction Register_. This can just be a local
 variable in `run()`.
 
+_Instruction Register_/reg[????] = reg[self.pc]
+find how many parameters does the instruction take? next step suggests just save the next 2 just incase
+
+
 Some instructions requires up to the next two bytes of data _after_ the `PC` in
 memory to perform operations on. Sometimes the byte value is a register number,
 other times it's a constant value (in the case of `LDI`). Using `ram_read()`,
 read the bytes at `PC+1` and `PC+2` from RAM into variables `operand_a` and
 `operand_b` in case the instruction needs them.
 
+pc = self.pc
+operand_a =reg[pc + 1]
+operand_b =reg[pc + 2]
+
 Then, depending on the value of the opcode, perform the actions needed for the
 instruction per the LS-8 spec. Maybe an `if-elif` cascade...? There are other
 options, too.
+
+    num_operands = instruction register[0:2] (end of slice inclusive or exclusive? just need first 2 numbers)
+    if "00", "01", "10", no "11"
 
 After running code for any particular instruction, the `PC` needs to be updated
 to point to the next instruction for the next iteration of the loop in `run()`.
 The number of bytes an instruction uses can be determined from the two high bits
 (bits 6-7) of the instruction opcode. See the LS-8 spec for details.
 
+??? future unknown, need to know how many instructions were used
+see LS-8 for seeing how many bytes an instruction uses, "AA" under "Instruction layout" section
+
 ## Step 4: Implement the `HLT` instruction handler
 
 Add the `HLT` instruction definition to `cpu.py` so that you can refer to it by
 name instead of by numeric value.
 
+    add HLT = whatever binary number
+
 In `run()` in your if-else block, exit the loop if a `HLT` instruction is
 encountered, regardless of whether or not there are more lines of code in the
 LS-8 program you loaded. 
+
+    while something != HLT or better yet HLT changes exit variable to true or false, then while exit
 
 We can consider `HLT` to be similar to Python's `exit()` in that we stop
 whatever we are doing, wherever we are.
@@ -146,6 +204,13 @@ This instruction sets a specified register to a specified value.
 See the LS-8 spec for the details of what this instructions does and its opcode
 value.
 
+    {LDI binary: LDI_function(),}
+
+    LDI is a P2 who's function should be
+     def LDI_function(register, integer):
+          register = integer
+          #pc increment taken care of at higher scope
+
 ## Step 6: Add the `PRN` instruction
 
 This is a very similar process to adding `LDI`, but the handler is simpler. See
@@ -154,6 +219,9 @@ the LS-8 spec.
 *At this point, you should be able to run the program and have it print `8` to
 the console!*
 
+
+      STEP 6 FIRST TESTABLE!!!!!!
+
 ## Step 7: Un-hardcode the machine code
 
 In `cpu.py`, the LS-8 programs you've been running so far have been hardcoded
@@ -161,6 +229,10 @@ into the source. This isn't particularly user-friendly.
 
 Make changes to `cpu.py` and `ls8.py` so that the program can be specified on
 the command line like so:
+
+  in cpu def needs file_program parameter
+      load(self, file_program)
+  in ls8.py load(sys.argv[0-8?])
 
 ```
 python3 ls8.py examples/mult.ls8
@@ -200,6 +272,8 @@ As you process lines from the file, you should be on the lookout for blank lines
 (ignore them), and you should ignore everything after a `#`, since that's a
 comment.
 
+    separate by space, ignore anything that starts with a # (go to next line at #)
+
 You'll have to convert the binary strings to integer values to store in RAM. The
 built-in `int()` function can do that when you specify a number base as the
 second argument:
@@ -207,6 +281,10 @@ second argument:
 ```python
 x = int("1010101", 2)  # Convert binary string to integer
 ```
+
+    take each string, convert it, store it in RAM
+
+    DID THIS BACKWARDS SO NOW I HAVE TO MAKE ALL MY HANDLERS CONVERT TO INT *CRIES IMMENSELY*
 
 ## Step 8: Implement a Multiply and Print the Result
 
@@ -240,6 +318,9 @@ Check the LS-8 spec for what the `MUL` instruction does.
 > Note: `MUL` is the responsiblity of the ALU, so it would be nice if your code
 > eventually called the `alu()` function with appropriate arguments to get the
 > work done.
+
+      add MULT to CPU alu
+      add cpu.alu() to ls8
 
 ## Step 9: Beautify your `run()` loop
 
@@ -288,6 +369,10 @@ c = Foo()
 c.run()
 ```
 
+
+    implement dictionary to speed up run() by opcode as key
+        opcode finds function to execute without checking if-elif
+
 ## Step 10: Implement System Stack
 
 All CPUs manage a _stack_ that can be used to store information temporarily.
@@ -309,6 +394,9 @@ If you run `python3 ls8.py examples/stack.ls8` you should see the output:
 4
 1
 ```
+
+  self.reg[7] (SP) = whatever address after push or pop WITHIN acceptable range of RAM portioned out according to spec
+  memory portion not exact in spec, starts at F3 with an F4 pointer if empty -- depending on the amount of instructions in a program, allocated from binary equivalent of F3 DOWN to one above where the highest program instruction is???
 
 ## Step 11: Implement Subroutine Calls
 
@@ -333,6 +421,8 @@ and `RET`.
 
   > Note: `CALL` is very similar to the `JMP` instruction. However, there is one
   > key difference between them. Can you find it in the specs? 
+
+      JMP can have PC skip many steps and never exe/return to them, CALL can return to exe the next instruction from PC even from what was JMPed to
 
   * In **any** case where the instruction handler sets the `PC` directly, you
     _don't_ want to advance the PC to the next instruction. So you'll have to
@@ -373,8 +463,15 @@ stack, look up the interrupt handler address in the interrupt vector
 table at address `0xF8`, and set the PC to it. Execution continues in
 the interrupt handler.
 
+      must apply CMP conditional self.fl setting "00000100", "00000010", or "00000001"
+      push pc, then fl, then R0-R6 to stack
+          this needs to be explicitly done for every register
+      I don't see the instructions loading anything in I0!?
+
 Then when an `IRET` instruction is found, the registers and PC are
 popped off the stack and execution continues normally.
+
+      Need to implement IRET
 
 ## Example
 
@@ -382,6 +479,10 @@ This code prints out the letter `A` from the timer interrupt handler
 that fires once per second.
 
 ```
+        need to implement PRA!!!!!
+        need to implement JMP!!!
+
+
 # interrupts.ls8
 
 10000010 # LDI R0,0XF8
